@@ -69,6 +69,7 @@
         .obs-card { background: #fffbeb; padding: 16px; border-left: 4px solid var(--warning); border-radius: 4px; margin-top: 10px; }
         .obs-card label { color: #92400e; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; display: block; margin-bottom: 5px;}
         .obs-card p { color: #92400e; font-size: 0.85rem; line-height: 1.5; white-space: normal; }
+        .btn-detail { background: none; border: none; color: var(--primary); cursor: pointer; }
     </style>
 </head>
 <body>
@@ -108,9 +109,12 @@
                 <div class="filter-section">
                     <span class="filter-label">Área:</span>
                     <select class="select-area" id="area-geral" onchange="renderTables()">
-                        <option value="Todas">Todas</option><option value="Operações">Operações</option>
-                        <option value="Clientes">Clientes</option><option value="Fiscal">Fiscal</option>
-                        <option value="Prospecção">Prospecção</option><option value="Todos">Todos</option>
+                        <option value="Todas">Todas</option>
+                        <option value="Operações">Operações</option>
+                        <option value="Clientes">Clientes</option>
+                        <option value="Fiscal">Fiscal</option>
+                        <option value="Prospecção">Prospecção</option>
+                        <option value="Todos">Todos</option>
                     </select>
                 </div>
             </div>
@@ -134,8 +138,10 @@
                 <div class="filter-section">
                     <span class="filter-label">Filtro:</span>
                     <select class="select-area" id="area-hnk" onchange="renderTables()">
-                        <option value="Todas">Tudo</option><option value="Squadfy">Squadfy</option>
-                        <option value="Relatório">Relatórios</option><option value="Tela">Interfaces</option>
+                        <option value="Todas">Tudo</option>
+                        <option value="Squadfy">Squadfy</option>
+                        <option value="Relatório">Relatórios</option>
+                        <option value="Tecnologia">Interfaces</option>
                     </select>
                 </div>
             </div>
@@ -165,7 +171,11 @@
                 <div class="info-group" id="g-in"><label>Início</label><p id="m-in">-</p></div>
                 <div class="info-group" id="g-pre"><label>Previsão</label><p id="m-pre">-</p></div>
                 <div class="info-group full-width" id="g-real" style="display:none;"><label>Concluído em</label><p id="m-real" style="color:var(--success);font-weight:700"></p></div>
-                <div class="full-width obs-card" id="m-obs-container" style="display:none;"><label>Observação</label><p id="m-obs"></p></div>
+                
+                <div class="full-width obs-card" id="m-obs-container" style="display:none;">
+                    <label id="m-obs-label">Informações</label>
+                    <p id="m-obs"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -182,66 +192,65 @@
         const weight = { "Em andamento": 1, "Em testes": 2, "Em Teste": 2, "Concluído - Ag. Autorização": 3, "Backlog": 4, "Aguardando": 5, "Concluído": 6 };
 
         const dataGeral = [
-            { nome: "Status desatualizado Correios", area: "Operações", cat: "Integração & APIs", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Alocação de material HNK", area: "Clientes", cat: "Evolução de Produto", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Melhorias e correções SmartPick", area: "Operações", cat: "Eficiência Operacional", sistema: "APP SmartPick", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Tela de bip p/ expedição e exclusão", area: "Operações", cat: "Eficiência Operacional", sistema: "LIS", status: "Em andamento", progresso: 70, inicio: "30/03/2026", fim: "08/05/2026", entrega: "-" },
-            { nome: "Cadastrar cep no DNE", area: "Clientes", cat: "Integração & APIs", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "app Coty", area: "Operações", cat: "Inovação", sistema: "APP Sil", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Modal impresso M&O", area: "Operações", cat: "Evolução", sistema: "Legado", status: "Em andamento", progresso: 10, inicio: "06/04/2026", fim: "24/04/2026", entrega: "-" },
-            { nome: "BID Online", area: "Prospecção", cat: "Inovação", sistema: "LIS", status: "Em testes", progresso: 90, inicio: "08/01/2026", fim: "30/04/2026", entrega: "-" },
-            { nome: "Trava para devolução", area: "Operações", cat: "Evolução", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "12/03/2026", fim: "-", entrega: "17/04/2026" },
-            { nome: "faturamento bases", area: "Operações", cat: "Inovação", sistema: "LIS", status: "Em andamento", progresso: 80, inicio: "26/03/2026", fim: "04/05/2026", entrega: "-" },
-            { nome: "RESSUPRIMENTO", area: "Operações", cat: "Eficiência", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "30/03/2026", fim: "-", entrega: "14/04/2026" },
-            { nome: "Melhorias Portal do fornecedor", area: "Operações", cat: "Evolução", sistema: "LIS", status: "Em andamento", progresso: 90, inicio: "10/04/2026", fim: "30/04/2026", entrega: "-" },
-            { nome: "API Sodexo", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Kuiper SKY API", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Danfe Simplificada", area: "Operações", cat: "Fiscal", sistema: "Legado", status: "Em andamento", progresso: 85, inicio: "16/12/2025", fim: "17/04/2026", entrega: "-" },
-            { nome: "API Haleon", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Reforma Tributária 2º fase", area: "Fiscal", cat: "Governança", sistema: "Legado", status: "Em andamento", progresso: 10, inicio: "20/04/2026", fim: "25/05/2026", entrega: "-" },
-            { nome: "Novo Modulo de Kits", area: "Clientes", cat: "Inovação", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Motor de importação Loreal", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Novo Orçamento", area: "Clientes", cat: "Evolução", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Nova plataforma gestão", area: "Operações", cat: "Inovação", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "LIS - Site 2.0 - Piloto HNK", area: "Clientes", cat: "Inovação", sistema: "LIS", status: "Em andamento", progresso: 10, inicio: "13/04/2026", fim: "01/07/2026", entrega: "-" },
-            { nome: "Novo Motor Orçamento", area: "Clientes", cat: "Evolução", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "01/07/2026", entrega: "-" },
-            { nome: "Implantação TMS", area: "Todos", cat: "Digital", sistema: "TMS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Implantação Módulo Fiscal", area: "Todos", cat: "Digital", sistema: "TOTVS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Implantação WMS", area: "Todos", cat: "Digital", sistema: "WMS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Implantação CRM", area: "Todos", cat: "Digital", sistema: "CRM", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Implementar IA", area: "Todos", cat: "Inovação", sistema: "IA", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Data Lake", area: "Todos", cat: "Analytics", sistema: "BI", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "APP Sodexo - Auditoria", area: "Clientes", cat: "Evolução", sistema: "APP", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "BI SmartCheckin PRP", area: "Clientes", cat: "Analytics", sistema: "BI", status: "Concluído", progresso: 100, inicio: "16/02/2026", fim: "-", entrega: "02/04/2026" },
-            { nome: "BI Umov.me", area: "Clientes", cat: "Analytics", sistema: "BI", status: "Em andamento", progresso: 70, inicio: "20/04/2026", fim: "04/05/2026", entrega: "-" },
-            { nome: "Correios SKY", area: "Clientes", cat: "Integração", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Novo fluxo AGF Correios", area: "Operações", cat: "Eficiência", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Troca da Vinco", area: "Fiscal", cat: "Custo", sistema: "Legado", status: "Concluído", progresso: 100, inicio: "20/04/2026", fim: "-", entrega: "27/04/2026" },
-            { nome: "Fluxo Devolução Jadlog", area: "Clientes", cat: "Eficiência", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" },
-            { nome: "Aplicativo Inventário", area: "Operações", cat: "Eficiência", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-" }
+            { nome: "Status desatualizado Correios", area: "Operações", cat: "Integração & APIs", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Garantir a correta integração entre o BI e os Correios, assegurando que os pedidos reflitam o status real, especialmente diferenciando corretamente entre “aguardando confirmação de entrega” e “etiqueta expirada”." },
+            { nome: "Melhorias e correções SmartPick", area: "Operações", cat: "Eficiência Operacional", sistema: "APP SmartPick", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar no SMARTPICK um código de identificação para PN, automatizando o processo de vinculação e eliminando o registro manual, garantindo maior rastreabilidade, agilidade e confiabilidade na separação dos materiais." },
+            { nome: "Tela de bip p/ expedição e exclusão", area: "Operações", cat: "Eficiência Operacional", sistema: "LIS", status: "Em andamento", progresso: 70, inicio: "30/03/2026", fim: "08/05/2026", entrega: "-", objetivo: "Otimizar o processo de expedição por meio da implementação do fluxo de entrada e saída de volumes via coletor e ajustes no sistema desktop SIL, garantindo identificação automática de pedidos, melhor gestão das ordens de coleta e maior precisão na conferência final." },
+            { nome: "Cadastrar cep no DNE", area: "Clientes", cat: "Integração & APIs", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Incluir a validação de CEP via API na tela de geração de prenota, garantindo maior consistência dos dados e redução de erros no cadastro." },
+            { nome: "App Coty", area: "Operações", cat: "Inovação", sistema: "APP Sil", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Aprimorar o fluxo de registro de fotos, garantindo a correta seleção e vinculação das notas fiscais, aumentando a precisão e a rastreabilidade do processo." },
+            { nome: "Modal impresso M&O", area: "Operações", cat: "Evolução", sistema: "Legado", status: "Em andamento", progresso: 10, inicio: "06/04/2026", fim: "24/04/2026", entrega: "-", objetivo: "Garantir a integração entre os dados do modal impresso e o M&O, assegurando a correta recepção e processamento das informações pelo M&O, uma vez que o envio via API já ocorre conforme esperado." },
+            { nome: "BID Online", area: "Prospecção", cat: "Inovação", sistema: "LIS", status: "Em testes", progresso: 90, inicio: "08/01/2026", fim: "30/04/2026", entrega: "-", objetivo: "Automatizar o processo de BID da área comercial, garantindo padronização, agilidade na condução das etapas e maior controle e rastreabilidade das informações." },
+            { nome: "Trava para devolução", area: "Operações", cat: "Evolução", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "12/03/2026", fim: "-", entrega: "17/04/2026", objetivo: "Implementar um processo que identifique automaticamente quando o usuário for uma transportadora, dispensando a solicitação de CNPJ do cliente e restringindo o agendamento para ocorrer exclusivamente às segundas-feiras, garantindo aderência às regras operacionais." },
+            { nome: "Faturamento bases", area: "Operações", cat: "Inovação", sistema: "LIS", status: "Em andamento", progresso: 80, inicio: "26/03/2026", fim: "04/05/2026", entrega: "-", objetivo: "Criar uma plataforma segura, padronizada e automatizada que permita gerir todos os acordos comerciais de armazenagem com terceiros, consolidar dados operacionais e gerar os valores de faturamento mensal." },
+            { nome: "Ressuprimento", area: "Operações", cat: "Eficiência", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "30/03/2026", fim: "-", entrega: "14/04/2026", objetivo: "Garantir que as posições de separação (Picking) sejam reabastecidas automaticamente com itens de alto giro provenientes do estoque comum." },
+            { nome: "Melhorias Portal do fornecedor", area: "Operações", cat: "Evolução", sistema: "LIS", status: "Em andamento", progresso: 90, inicio: "10/04/2026", fim: "30/04/2026", entrega: "-", objetivo: "Adequar e evoluir as regras da ferramenta com base nas necessidades identificadas durante o uso, garantindo maior aderência operacional, eficiência e qualidade nas entregas." },
+            { nome: "API Sodexo", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar transmissão direta de dados, eliminando a necessidade de upload manual de arquivos TXT no SIL e reduzindo o tempo operacional." },
+            { nome: "Kuiper SKY API", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Garantir agilidade no setup por meio de uma integração rápida para novos fluxos promocionais da SKY, reduzindo o tempo de implementação e acelerando a entrada em operação." },
+            { nome: "Danfe Simplificada", area: "Operações", cat: "Fiscal", sistema: "Legado", status: "Em andamento", progresso: 85, inicio: "16/12/2025", fim: "17/04/2026", entrega: "-", objetivo: "Aumentar a agilidade no packout, reduzindo o tempo operacional por caixa expedida e otimizando a eficiência do processo." },
+            { nome: "API Haleon", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Aumentar a segurança operacional por meio do recebimento automatizado de mailings, eliminando a necessidade de intervenção manual e reduzindo riscos de erro." },
+            { nome: "Reforma Tributária 2º fase", area: "Fiscal", cat: "Governança", sistema: "Legado", status: "Em andamento", progresso: 10, inicio: "20/04/2026", fim: "25/05/2026", entrega: "-", objetivo: "Garantir a continuidade e conformidade operacional do Pier em 2026, assegurando sua atuação dentro das exigências legais." },
+            { nome: "Novo Modulo de Kits", area: "Clientes", cat: "Inovação", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Desenvolver um novo módulo de kits que suporte a evolução operacional e atenda às demandas do cliente, garantindo a integridade de todo o fluxo operacional, fiscal e sistêmico." },
+            { nome: "Motor de importação Loreal", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Desenvolver uma ferramenta capaz de suportar o mailing da L'Oréal com mais de 30 mil envios por lote, garantindo a validação cadastral do destinatário e o controle de saldo de forma ágil." },
+            { nome: "Novo Orçamento para demais clientes", area: "Clientes", cat: "Evolução", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Garantir a importação das grades dos clientes via site de forma ágil, intuitiva, precisa e eficiente." },
+            { nome: "Nova plataforma de gestão parceiros", area: "Operações", cat: "Inovação", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Evoluir o site das bases para torná-lo mais rápido, estável e eficiente, melhorando a performance e a experiência de uso." },
+            { nome: "LIS - Site 2.0 - Piloto Heineken", area: "Clientes", cat: "Inovação", sistema: "LIS", status: "Em andamento", progresso: 10, inicio: "13/04/2026", fim: "01/07/2026", entrega: "-", objetivo: "Disponibilizar as ferramentas mais utilizadas pela HNK em um novo site, com front-end moderno, mais ágil e eficiente." },
+            { nome: "Novo Motor Orçamento", area: "Clientes", cat: "Evolução", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "01/07/2026", entrega: "-", objetivo: "Garantir que o novo orçamento web seja desenvolvido em um ambiente e linguagem mais modernos e fluídos." },
+            { nome: "Implantação TMS", area: "Todos", cat: "Digital", sistema: "TMS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o TMS, estruturando processos, integrações e controles para otimizar a gestão e aumentar a visibilidade das operações." },
+            { nome: "Implantação Módulo Fiscal Totvs", area: "Todos", cat: "Digital", sistema: "TOTVS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o módulo fiscal da TOTVS, garantindo conformidade tributária, automação dos processos fiscais e integração eficiente." },
+            { nome: "Implantação WMS", area: "Todos", cat: "Digital", sistema: "WMS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o WMS, estruturando processos e integrações para aumentar a acuracidade de estoque." },
+            { nome: "Implantação CRM", area: "Todos", cat: "Digital", sistema: "CRM", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o CRM, estruturando processos para aprimorar a gestão do relacionamento com clientes e aumentar a visibilidade do funil." },
+            { nome: "Implementar IA", area: "Todos", cat: "Inovação", sistema: "Empresa", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar soluções de IA para automatizar processos, apoiar a tomada de decisão e aumentar a eficiência operacional." },
+            { nome: "Data Lake", area: "Todos", cat: "Analytics", sistema: "BI", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar um Data Lake para centralizar grandes volumes de dados de diferentes fontes, garantindo escalabilidade e governança." },
+            { nome: "APP Sodexo - Auditoria", area: "Clientes", cat: "Evolução", sistema: "APP SmartCheckin", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o app de Auditoria da Sodexo para a operação de mini mercado." },
+            { nome: "BI SmartCheckin PRP", area: "Clientes", cat: "Analytics", sistema: "BI", status: "Concluído", progresso: 100, inicio: "16/02/2026", fim: "-", entrega: "02/04/2026", objetivo: "Implementar o BI do SmartCheck-in PRP, consolidando dados e indicadores para garantir visibilidade ao cliente." },
+            { nome: "BI Umov.me", area: "Clientes", cat: "Analytics", sistema: "BI", status: "Em andamento", progresso: 70, inicio: "20/04/2026", fim: "04/05/2026", entrega: "-", objetivo: "Integrar o BI com a plataforma Umov.me." },
+            { nome: "Novo fluxo AGF Correios", area: "Operações", cat: "Eficiência", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar um novo fluxo para AGF dos Correios, garantindo padronização do processo e maior controle operacional." },
+            { nome: "Troca da Vinco", area: "Fiscal", cat: "Custo", sistema: "Legado", status: "Concluído", progresso: 100, inicio: "20/04/2026", fim: "-", entrega: "27/04/2026", objetivo: "Realizar a troca da plataforma Vinco, garantindo uma transição segura com foco em redução de custos." },
+            { nome: "Fluxo Devolução Jadlog", area: "Clientes", cat: "Eficiência", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Estruturar e implementar o fluxo de devolução da Jadlog, garantindo padronização e rastreabilidade." },
+            { nome: "Aplicativo Inventário", area: "Operações", cat: "Eficiência", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Desenvolver um aplicativo de inventário para maior acuracidade de estoque e agilidade na contagem." },
+            { nome: "App IA (Conferência)", area: "Operações", cat: "Inovação", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "02/12/2025", fim: "-", entrega: "10/12/2025", objetivo: "Aumentar a velocidade de conferência por meio de reconhecimento visual, tornando o processo mais ágil." }
         ];
 
         const dataHnk = [
-            { nome: "Tela Pedido Unitario", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 40, inicio: "13/04/26", fim: "07/05/26", entrega: "-", obs: "" },
-            { nome: "Tela Pedidos Pendentes", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 10, inicio: "14/04/26", fim: "30/04/26", entrega: "-", obs: "" },
-            { nome: "Aprovar Pedido", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 20, inicio: "15/04/26", fim: "06/05/26", entrega: "-", obs: "" },
-            { nome: "Regra aprovação de Pedido", area: "Tecnologia", cat: "Regra", sistema: "LIS 2.0", status: "Em andamento", progresso: 25, inicio: "16/04/26", fim: "08/05/26", entrega: "-", obs: "" },
-            { nome: "Relatório - Saldo Bases", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "17/04/26", fim: "07/05/26", entrega: "-", obs: "" },
-            { nome: "Relatório - Saidas Heineken", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "20/04/26", fim: "13/05/26", entrega: "-", obs: "" },
-            { nome: "Relatório - Historico", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "05/05/26", fim: "26/05/26", entrega: "-", obs: "" },
-            { nome: "Relatório - Aging v1.0", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "06/05/26", fim: "27/05/26", entrega: "-", obs: "" },
-            { nome: "Relatório - Recebimento", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "27/04/26", fim: "22/05/26", entrega: "-", obs: "" },
-            { nome: "Relatório - Pendência Fiscal", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "28/04/26", fim: "23/05/26", entrega: "-", obs: "" },
-            { nome: "Dashboard Heineken", area: "Relatório", cat: "Analytics", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "20/05/26", fim: "23/05/26", entrega: "-", obs: "" },
-            { nome: "Relatório - Tracking", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "29/04/26", fim: "16/05/26", entrega: "-", obs: "" },
-            { nome: "Relatório - Meu Estoque", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "19/05/26", fim: "16/06/26", entrega: "-", obs: "" },
-            { nome: "Transferencia Depto/Canal", area: "Relatório", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "04/05/26", fim: "22/05/26", entrega: "-", obs: "" },
+            { nome: "Tela Pedido Unitario", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 40, inicio: "13/04/2026", fim: "07/05/2026", entrega: "-", obs: "Desenvolvimento do novo front-end e motor para pedidos individuais." },
+            { nome: "Tela Pedidos Pendentes", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 10, inicio: "14/04/2026", fim: "30/04/2026", entrega: "-", obs: "Interface para gestão de pedidos aguardando processamento." },
+            { nome: "Aprovar Pedido", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 20, inicio: "15/04/2026", fim: "06/05/2026", entrega: "-", obs: "Funcionalidade de aprovação de pedidos por modal, solicitante ou área." },
+            { nome: "Regra aprovação de Pedido", area: "Tecnologia", cat: "Regra", sistema: "LIS 2.0", status: "Em andamento", progresso: 25, inicio: "16/04/2026", fim: "08/05/2026", entrega: "-", obs: "Configuração das regras de negócio para fluxos de aprovação." },
+            { nome: "Relatório - Saldo Bases", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "17/04/2026", fim: "07/05/2026", entrega: "-", obs: "Visão consolidada de estoque por base." },
+            { nome: "Relatório - Saidas Heineken", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "20/04/2026", fim: "13/05/2026", entrega: "-", obs: "Extrato de movimentações de saída da operação." },
+            { nome: "Relatório - Historico", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "05/05/2026", fim: "26/05/2026", entrega: "-", obs: "Log de histórico de pedidos e movimentações de entrada." },
+            { nome: "Relatório - Aging v1.0", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "06/05/2026", fim: "27/05/2026", entrega: "-", obs: "Nova lógica para reduzir tempo de consulta." },
+            { nome: "Relatório - Recebimento", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "27/04/2026", fim: "22/05/2026", entrega: "-", obs: "Controle de itens recebidos." },
+            { nome: "Relatório - Pendência Fiscal", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "28/04/2026", fim: "23/05/2026", entrega: "-", obs: "Relatório de pendência de cobertura fiscal." },
+            { nome: "Dashboard Heineken", area: "Relatório", cat: "Analytics", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "20/05/2026", fim: "23/05/2026", entrega: "-", obs: "Painel de indicadores gerenciais HNK." },
+            { nome: "Relatório - Tracking", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "29/04/2026", fim: "16/05/2026", entrega: "-", obs: "Rastreabilidade completa de pedidos." },
+            { nome: "Relatório - Meu Estoque", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "19/05/2026", fim: "16/06/2026", entrega: "-", obs: "Visão do cliente sobre as movimentações do aplicativo ." },
+            { nome: "Transferencia Depto/Canal", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "04/05/2026", fim: "22/05/2026", entrega: "-", obs: "Funcionalidade para transferir saldo entre centros de custo." },
             { nome: "Squadfy - API de estoque", area: "Squadfy", cat: "API", sistema: "Pier / Squadfy", status: "Em andamento", progresso: 50, inicio: "-", fim: "20/04/26", entrega: "-", obs: "Foi solicitado um novo campo pela Squadfy alinhada com a Heineken" },
             { nome: "Squadfy - API de login", area: "Squadfy", cat: "API", sistema: "Pier / Squadfy", status: "Em Teste", progresso: 90, inicio: "-", fim: "-", entrega: "-", obs: "Esta API já esta pronta do lado do Pier, porém como é consumida pela Sqauadfy, depende do desenvolvimento deles" },
             { nome: "Squadfy - API permissões", area: "Squadfy", cat: "API", sistema: "Pier / Squadfy", status: "Em Teste", progresso: 90, inicio: "-", fim: "-", entrega: "-", obs: "Esta API já esta pronta do lado do Pier, porém como é consumida pela Sqauadfy, depende do desenvolvimento deles" },
             { nome: "Squadfy - Usuário via SSO", area: "Squadfy", cat: "Integração", sistema: "Pier / Squadfy", status: "Concluído - Ag. Autorização", progresso: 100, inicio: "-", fim: "-", entrega: "-", obs: "Esta feature envolve remoção e adição de permissões com base no grupo recebido pelo AD da Heineken, assim que autorizado, seguirá exatamente o perfil" },
-            { nome: "Squadfy - Tela permissões", area: "Squadfy", cat: "Desenvolvimento", sistema: "Pier / Squadfy", status: "Concluído - Ag. Autorização", progresso: 100, inicio: "25/11/25", fim: "-", entrega: "-", obs: "Este processo já foi concluído anteriormente. No entanto, considerando o intervalo de tempo desde sua finalização, recomendamos realizar uma nova apresentação antes da subida em produção. Após a validação, poderemos seguir com o deploy de forma segura e alinhada. Está pendente a regra de quem irá aprovar cada área." },
-            { nome: "Relatório - Aging v2.0", area: "Relatório", cat: "Relatório", sistema: "LIS 2.0", status: "Em andamento", progresso: 50, inicio: "16/04/26", fim: "24/04/26", entrega: "-", obs: "Aging por tempo de estoque - Nas análises, especialmente do BI, identificamos que não se trata de um simples “copia e cola” para o site, sendo necessários ajustes para garantir aderência e qualidade." }
+            { nome: "Squadfy - Tela permissões", area: "Squadfy", cat: "Desenvolvimento", sistema: "Pier / Squadfy", status: "Concluído - Ag. Autorização", progresso: 100, inicio: "25/11/25", fim: "-", entrega: "-", obs: "Este processo já foi concluído anteriormente. No entanto, recomendamos realizar uma nova apresentação antes da subida em produção. Está pendente a regra de quem irá aprovar cada área." },
+            { nome: "Relatório - Aging v2.0", area: "Relatório", cat: "Relatório", sistema: "LIS 2.0", status: "Em andamento", progresso: 50, inicio: "16/04/26", fim: "29/04/26", entrega: "-", obs: "Aging por tempo de estoque - Nas análises identificamos que não se trata de um simples “copia e cola” para o site, sendo necessários ajustes para garantir aderência." }
         ];
 
         function generateBattery(p, s) {
@@ -268,8 +277,14 @@
             const tH = document.getElementById('table-hnk');
 
             document.querySelectorAll('.kpi-card').forEach(k => k.classList.remove('active-filter'));
-            if(filterGeral !== 'Todos') document.getElementById('kg-' + (filterGeral==='Ativos'?'active':(filterGeral==='Fila'?'wait':'done'))).classList.add('active-filter');
-            if(filterHnk !== 'Todos') document.getElementById('kh-' + (filterHnk==='Ativos'?'active':(filterHnk==='Backlog'?'wait':'done'))).classList.add('active-filter');
+            if(filterGeral !== 'Todos') {
+                const id = 'kg-' + (filterGeral==='Ativos'?'active':(filterGeral==='Fila'?'wait':'done'));
+                if(document.getElementById(id)) document.getElementById(id).classList.add('active-filter');
+            }
+            if(filterHnk !== 'Todos') {
+                const id = 'kh-' + (filterHnk==='Ativos'?'active':(filterHnk==='Backlog'?'wait':'done'));
+                if(document.getElementById(id)) document.getElementById(id).classList.add('active-filter');
+            }
 
             let gA=0, gD=0, gW=0, hA=0, hD=0, hW=0;
 
@@ -293,7 +308,8 @@
                 let show = filterHnk==='Todos' || (filterHnk==='Ativos' && p.status.includes('andamento')) || (filterHnk==='Concluidos' && (p.status.includes('Concluído')||p.status.includes('Teste'))) || (filterHnk==='Backlog' && !p.status.includes('andamento') && !p.status.includes('Concluído') && !p.status.includes('Teste'));
                 if(show) {
                     let idx = dataHnk.findIndex(x => x.nome === p.nome);
-                    tH.innerHTML += `<tr><td><strong>${p.nome}</strong></td><td>${generateBattery(p.progresso, p.status)}</td><td><span class="badge ${getSClass(p.status)}">${p.status}</span></td><td>${p.obs.substring(0, 30)}...</td><td style="text-align:right"><button class="btn-detail" onclick="openModal('hnk', ${idx})"><i class="fas fa-chevron-right"></i></button></td></tr>`;
+                    let obsResumo = p.obs ? p.obs.substring(0, 25) + "..." : "-";
+                    tH.innerHTML += `<tr><td><strong>${p.nome}</strong></td><td>${generateBattery(p.progresso, p.status)}</td><td><span class="badge ${getSClass(p.status)}">${p.status}</span></td><td>${obsResumo}</td><td style="text-align:right"><button class="btn-detail" onclick="openModal('hnk', ${idx})"><i class="fas fa-chevron-right"></i></button></td></tr>`;
                 }
             });
 
@@ -310,6 +326,7 @@
             document.getElementById('m-sistema').innerText = p.sistema;
             document.getElementById('m-cat').innerText = p.cat;
             let b = document.getElementById('m-status-badge'); b.innerText = p.status; b.className = "badge " + getSClass(p.status);
+            
             if(p.status.includes('Concluído')) {
                 document.getElementById('g-in').style.display = "none"; document.getElementById('g-pre').style.display = "none";
                 document.getElementById('g-real').style.display = "block"; document.getElementById('m-real').innerText = p.entrega;
@@ -317,9 +334,26 @@
                 document.getElementById('g-in').style.display = "block"; document.getElementById('g-pre').style.display = "block";
                 document.getElementById('g-real').style.display = "none"; document.getElementById('m-in').innerText = p.inicio; document.getElementById('m-pre').innerText = p.fim;
             }
-            let o = document.getElementById('m-obs-container'); if(p.obs) { o.style.display = "block"; document.getElementById('m-obs').innerText = p.obs; } else { o.style.display = "none"; }
+
+            const obsBox = document.getElementById('m-obs-container');
+            const obsLabel = document.getElementById('m-obs-label');
+            const obsText = document.getElementById('m-obs');
+
+            if (t === 'geral' && p.objetivo) {
+                obsBox.style.display = "block";
+                obsLabel.innerText = "Objetivo";
+                obsText.innerText = p.objetivo;
+            } else if (t === 'hnk' && p.obs) {
+                obsBox.style.display = "block";
+                obsLabel.innerText = "Observação";
+                obsText.innerText = p.obs;
+            } else {
+                obsBox.style.display = "none";
+            }
+
             document.getElementById('modal').style.display = 'flex';
         }
+
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
         window.onclick = function(e) { if(e.target == document.getElementById('modal')) closeModal(); }
         window.onload = renderTables;
