@@ -6,6 +6,7 @@
     <title>Portal Executivo PierServ</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-body: #f8fafc;
@@ -21,6 +22,8 @@
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { background-color: var(--bg-body); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
+        
+        /* Navbar */
         .navbar { background-color: var(--navbar-bg); color: white; padding: 0 48px; height: 70px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .nav-left { display: flex; align-items: center; gap: 40px; }
         .logo-img { max-height: 35px; display: block; }
@@ -28,37 +31,84 @@
         .nav-item { color: #cbd5e1; text-decoration: none; font-size: 0.85rem; font-weight: 500; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
         .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
         .nav-item.active { color: white; background: var(--primary); }
+        
         .container { max-width: 1260px; width: 100%; margin: 40px auto; padding: 0 24px; flex: 1; }
-        .view { display: none; animation: fadeIn 0.3s ease-out; }
-        .view.active { display: block; }
+        .view { display: none; }
+        .view.active { display: block; animation: fadeIn 0.3s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .page-header { margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center; }
-        .page-header h2 { font-size: 1.5rem; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
-        .filter-section { display: flex; align-items: center; gap: 12px; background: var(--white); padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border); }
-        .filter-label { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-        .select-area { border: none; font-size: 0.85rem; font-weight: 600; color: var(--primary); cursor: pointer; outline: none; background: transparent; }
-        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-bottom: 32px; }
+        
+        .page-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+        .page-header h2 { font-size: 1.4rem; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; }
+
+        /* Filtro Estilo Imagem */
+        .custom-filter { position: relative; display: inline-block; min-width: 180px; }
+        .filter-trigger { 
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        .filter-trigger .label { font-weight: 700; color: #64748b; text-transform: uppercase; margin-right: 8px; letter-spacing: 0.5px; font-size: 0.75rem; }
+        .filter-trigger .value { font-weight: 700; color: var(--primary); }
+        .filter-trigger i { color: var(--primary); font-size: 0.8rem; margin-left: 10px; }
+
+        .filter-options {
+            position: absolute;
+            top: calc(100% + 5px);
+            right: 0;
+            width: 100%;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .filter-options.show { display: block; }
+        .option-item { padding: 10px 16px; font-size: 0.85rem; color: var(--text-main); cursor: pointer; font-weight: 500; }
+        .option-item:hover { background: #eff6ff; color: var(--primary); }
+
+        /* Dashboard */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 32px; }
         .kpi-card { background: var(--white); padding: 24px; border-radius: 12px; border: 1px solid var(--border); cursor: pointer; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.02); }
         .kpi-card:hover { border-color: #cbd5e1; transform: translateY(-2px); }
         .kpi-card.active-filter { border: 2px solid var(--primary); background: #f8fafc; }
-        .kpi-title { font-size: 0.8rem; font-weight: 500; color: var(--text-muted); }
-        .kpi-value { font-size: 1.8rem; font-weight: 600; margin-top: 8px; color: #0f172a; }
+        
+        .lobby-card-content { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; }
+        .lobby-stats-text { display: flex; flex-direction: column; gap: 10px; }
+        .chart-container { width: 110px; height: 110px; }
+        .stat-group { display: flex; flex-direction: column; }
+        .stat-val { font-size: 1.1rem; font-weight: 700; color: #0f172a; }
+        .stat-lbl { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+        .area-chart-card { grid-column: span 2; background: var(--white); padding: 24px; border-radius: 12px; border: 1px solid var(--border); }
+
+        /* Tabelas */
         .card-view { background: var(--white); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         th { background: #f8fafc; padding: 12px 24px; text-align: left; font-size: 0.75rem; font-weight: 500; color: var(--text-muted); border-bottom: 1px solid var(--border); }
         td { padding: 16px 24px; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: #334155; vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        
         .progress-wrapper { display: flex; align-items: center; gap: 10px; }
         .progress-text { font-weight: 600; font-size: 0.75rem; width: 35px; color: var(--text-main); }
         .battery-container { width: 60px; height: 8px; background: #f1f5f9; border-radius: 4px; display: flex; gap: 2px; overflow: hidden; }
         .battery-segment { flex: 1; background: transparent; }
         .battery-segment.active { background: var(--primary); }
         .battery-segment.active.success { background: var(--success); }
+        
         .badge { padding: 4px 10px; border-radius: 16px; font-size: 0.7rem; font-weight: 500; text-transform: uppercase; }
         .st-andamento { background: #eff6ff; color: #1d4ed8; }
         .st-concluido { background: #ecfdf5; color: #047857; }
         .st-testes { background: #fefce8; color: #a16207; }
         .st-backlog { background: #f1f5f9; color: #475569; }
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(2px); }
+        
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.5); display: none; align-items: center; justify-content: center; z-index: 5000; backdrop-filter: blur(2px); }
         .modal-content { background: var(--white); width: 600px; border-radius: 12px; padding: 32px; position: relative; max-height: 90vh; overflow-y: auto;}
         .close-modal { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.2rem; color: var(--text-muted); }
         .modal-header h2 { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; color: #0f172a; }
@@ -69,13 +119,13 @@
         .obs-card { background: #fffbeb; padding: 16px; border-left: 4px solid var(--warning); border-radius: 4px; margin-top: 10px; }
         .obs-card label { color: #92400e; font-weight: 700; font-size: 0.65rem; text-transform: uppercase; display: block; margin-bottom: 5px;}
         .obs-card p { color: #92400e; font-size: 0.85rem; line-height: 1.5; white-space: normal; }
-        .btn-detail { background: none; border: none; color: var(--primary); cursor: pointer; }
+        .btn-detail { background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1rem; }
     </style>
 </head>
 <body>
     <header class="navbar">
         <div class="nav-left">
-            <img src="https://via.placeholder.com/150x40?text=PIERSERV" alt=" PierServ" class="logo-img">
+            <img src="https://via.placeholder.com/150x40?text=PIERSERV" alt="PierServ" class="logo-img">
             <div class="nav-links">
                 <div class="nav-item active" id="nav-lobby" onclick="mudarTela('view-lobby', this)">
                     <i class="fas fa-th-large"></i> Estratégico
@@ -93,12 +143,32 @@
     <main class="container">
         <div id="view-lobby" class="view active">
             <div class="page-header"><h2>Governança de Projetos</h2></div>
-            <div class="kpi-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="kpi-grid">
                 <div class="kpi-card" onclick="mudarTela('view-geral', document.getElementById('nav-geral'))">
-                    <div class="kpi-title">Projetos Ativos</div><div class="kpi-value" style="color: var(--primary);">Esteira de TI</div>
+                    <div class="kpi-value" style="color: var(--primary);">Esteira de TI</div>
+                    <div class="lobby-card-content">
+                        <div class="lobby-stats-text">
+                            <div class="stat-group"><span class="stat-val" id="lb-ti-total">0</span><span class="stat-lbl">Total</span></div>
+                            <div class="stat-group"><span class="stat-val" id="lb-ti-active" style="color:var(--primary)">0</span><span class="stat-lbl">Ativos</span></div>
+                            <div class="stat-group"><span class="stat-val" id="lb-ti-done" style="color:var(--success)">0</span><span class="stat-lbl">Concluídos</span></div>
+                        </div>
+                        <div class="chart-container"><canvas id="chartTI"></canvas></div>
+                    </div>
                 </div>
                 <div class="kpi-card" onclick="mudarTela('view-hnk', document.getElementById('nav-hnk'))">
-                    <div class="kpi-title">Cronograma Heineken</div><div class="kpi-value" style="color: var(--success);">Operação HNK</div>
+                    <div class="kpi-value" style="color: var(--success);">Operação HNK</div>
+                    <div class="lobby-card-content">
+                        <div class="lobby-stats-text">
+                            <div class="stat-group"><span class="stat-val" id="lb-hnk-total">0</span><span class="stat-lbl">Total</span></div>
+                            <div class="stat-group"><span class="stat-val" id="lb-hnk-active" style="color:var(--primary)">0</span><span class="stat-lbl">Ativos</span></div>
+                            <div class="stat-group"><span class="stat-val" id="lb-hnk-done" style="color:var(--success)">0</span><span class="stat-lbl">Concluídos</span></div>
+                        </div>
+                        <div class="chart-container"><canvas id="chartHNK"></canvas></div>
+                    </div>
+                </div>
+                <div class="area-chart-card">
+                    <div class="kpi-title" style="margin-bottom: 15px;">Volume de Demandas por Área</div>
+                    <div style="height: 180px;"><canvas id="chartAreas"></canvas></div>
                 </div>
             </div>
         </div>
@@ -106,16 +176,19 @@
         <div id="view-geral" class="view">
             <div class="page-header">
                 <h2>Portfólio de Tecnologia</h2>
-                <div class="filter-section">
-                    <span class="filter-label">Área:</span>
-                    <select class="select-area" id="area-geral" onchange="renderTables()">
-                        <option value="Todas">Todas</option>
-                        <option value="Operações">Operações</option>
-                        <option value="Clientes">Clientes</option>
-                        <option value="Fiscal">Fiscal</option>
-                        <option value="Prospecção">Prospecção</option>
-                        <option value="Todos">Todos</option>
-                    </select>
+                <div class="custom-filter">
+                    <div class="filter-trigger" id="trigger-ti">
+                        <span class="label">FILTRO:</span>
+                        <span class="value" id="val-ti">Todas</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="filter-options" id="drop-ti">
+                        <div class="option-item" onclick="setCustomFilter('geral', 'Todas')">Todas</div>
+                        <div class="option-item" onclick="setCustomFilter('geral', 'Operações')">Operações</div>
+                        <div class="option-item" onclick="setCustomFilter('geral', 'Clientes')">Clientes</div>
+                        <div class="option-item" onclick="setCustomFilter('geral', 'Fiscal')">Fiscal</div>
+                        <div class="option-item" onclick="setCustomFilter('geral', 'Prospecção')">Prospecção</div>
+                    </div>
                 </div>
             </div>
             <div class="kpi-grid">
@@ -135,14 +208,18 @@
         <div id="view-hnk" class="view">
             <div class="page-header">
                 <h2>Operação Heineken</h2>
-                <div class="filter-section">
-                    <span class="filter-label">Filtro:</span>
-                    <select class="select-area" id="area-hnk" onchange="renderTables()">
-                        <option value="Todas">Tudo</option>
-                        <option value="Squadfy">Squadfy</option>
-                        <option value="Relatório">Relatórios</option>
-                        <option value="Tecnologia">Interfaces</option>
-                    </select>
+                <div class="custom-filter">
+                    <div class="filter-trigger" id="trigger-hnk">
+                        <span class="label">FILTRO:</span>
+                        <span class="value" id="val-hnk">Tudo</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="filter-options" id="drop-hnk">
+                        <div class="option-item" onclick="setCustomFilter('hnk', 'Todas')">Tudo</div>
+                        <div class="option-item" onclick="setCustomFilter('hnk', 'Squadfy')">Squadfy</div>
+                        <div class="option-item" onclick="setCustomFilter('hnk', 'Relatório')">Relatórios</div>
+                        <div class="option-item" onclick="setCustomFilter('hnk', 'Tecnologia')">Interfaces</div>
+                    </div>
                 </div>
             </div>
             <div class="kpi-grid">
@@ -162,7 +239,7 @@
 
     <div class="modal-overlay" id="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()"><i class="fas fa-times"></i></span>
+            <span class="close-modal" id="btn-close-modal"><i class="fas fa-times"></i></span>
             <div class="modal-header"><h2 id="m-nome">Projeto</h2><span id="m-status-badge" class="badge">Status</span></div>
             <div class="modal-body">
                 <div class="info-group"><label>Responsável / Área</label><p id="m-area">-</p></div>
@@ -171,26 +248,19 @@
                 <div class="info-group" id="g-in"><label>Início</label><p id="m-in">-</p></div>
                 <div class="info-group" id="g-pre"><label>Previsão</label><p id="m-pre">-</p></div>
                 <div class="info-group full-width" id="g-real" style="display:none;"><label>Concluído em</label><p id="m-real" style="color:var(--success);font-weight:700"></p></div>
-                
-                <div class="full-width obs-card" id="m-obs-container" style="display:none;">
-                    <label id="m-obs-label">Informações</label>
-                    <p id="m-obs"></p>
-                </div>
+                <div class="full-width obs-card" id="m-obs-container" style="display:none;"><label id="m-obs-label">Informações</label><p id="m-obs"></p></div>
             </div>
         </div>
     </div>
 
     <script>
-        function mudarTela(id, el) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(el) { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); }
-            renderTables();
-        }
-
+        let curAreaTI = 'Todas', curAreaHNK = 'Todas';
         let filterGeral = 'Todos', filterHnk = 'Todos';
-        const weight = { "Em andamento": 1, "Em testes": 2, "Em Teste": 2, "Concluído - Ag. Autorização": 3, "Backlog": 4, "Aguardando": 5, "Concluído": 6 };
+        let chartTI, chartHNK, chartAreas;
 
+        const weight = { "Em andamento": 1, "Em testes": 2, "Em Teste": 2, "Backlog": 3, "Aguardando": 3, "Concluído - Ag. Autorização": 4, "Concluído": 5 };
+
+        // DADOS COMPLETOS E ORIGINAIS
         const dataGeral = [
             { nome: "Status desatualizado Correios", area: "Operações", cat: "Integração & APIs", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Garantir a correta integração entre o BI e os Correios, assegurando que os pedidos reflitam o status real, especialmente diferenciando corretamente entre “aguardando confirmação de entrega” e “etiqueta expirada”." },
             { nome: "Melhorias e correções SmartPick", area: "Operações", cat: "Eficiência Operacional", sistema: "APP SmartPick", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar no SMARTPICK um código de identificação para PN, automatizando o processo de vinculação e eliminando o registro manual, garantindo maior rastreabilidade, agilidade e confiabilidade na separação dos materiais." },
@@ -199,9 +269,9 @@
             { nome: "App Coty", area: "Operações", cat: "Inovação", sistema: "APP Sil", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Aprimorar o fluxo de registro de fotos, garantindo a correta seleção e vinculação das notas fiscais, aumentando a precisão e a rastreabilidade do processo." },
             { nome: "Modal impresso M&O", area: "Operações", cat: "Evolução", sistema: "Legado", status: "Em andamento", progresso: 10, inicio: "06/04/2026", fim: "24/04/2026", entrega: "-", objetivo: "Garantir a integração entre os dados do modal impresso e o M&O, assegurando a correta recepção e processamento das informações pelo M&O, uma vez que o envio via API já ocorre conforme esperado." },
             { nome: "BID Online", area: "Prospecção", cat: "Inovação", sistema: "LIS", status: "Em testes", progresso: 90, inicio: "08/01/2026", fim: "30/04/2026", entrega: "-", objetivo: "Automatizar o processo de BID da área comercial, garantindo padronização, agilidade na condução das etapas e maior controle e rastreabilidade das informações." },
-            { nome: "Trava para devolução", area: "Operações", cat: "Evolução", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "12/03/2026", fim: "-", entrega: "17/04/2026", objetivo: "Implementar um processo que identifique automaticamente quando o usuário for uma transportadora, dispensando a solicitação de CNPJ do cliente e restringindo o agendamento para ocorrer exclusivamente às segundas-feiras, garantindo aderência às regras operacionais." },
-            { nome: "Faturamento bases", area: "Operações", cat: "Inovação", sistema: "LIS", status: "Em andamento", progresso: 80, inicio: "26/03/2026", fim: "04/05/2026", entrega: "-", objetivo: "Criar uma plataforma segura, padronizada e automatizada que permita gerir todos os acordos comerciais de armazenagem com terceiros, consolidar dados operacionais e gerar os valores de faturamento mensal." },
-            { nome: "Ressuprimento", area: "Operações", cat: "Eficiência", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "30/03/2026", fim: "-", entrega: "14/04/2026", objetivo: "Garantir que as posições de separação (Picking) sejam reabastecidas automaticamente com itens de alto giro provenientes do estoque comum." },
+            { nome: "Trava para devolução - Portal Forn.", area: "Operações", cat: "Evolução", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "12/03/2026", fim: "-", entrega: "17/04/2026", objetivo: "Implementar um processo que identifique automaticamente quando o usuário for uma transportadora, dispensando a solicitação de CNPJ do cliente e restringindo o agendamento para ocorrer exclusivamente às segundas-feiras, garantindo aderência às regras operacionais." },
+            { nome: "Faturamento bases", area: "Operações", cat: "Inovação", sistema: "LIS", status: "Em andamento", progresso: 80, inicio: "26/03/2026", fim: "04/05/2026", entrega: "-", objetivo: "O objetivo central é criar uma plataforma segura, padronizada e automatizada que permita gerir todos os acordos comerciais de armazenagem com terceiros, consolidar dados operacionais e gerar os valores de faturamento mensal de forma transparente, auditável e colaborativa entre a empresa e as bases." },
+            { nome: "Ressuprimento", area: "Operações", cat: "Eficiência", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "30/03/2026", fim: "-", entrega: "14/04/2026", objetivo: "O objetivo deste módulo é garantir que as posições de separação (Picking) sejam reabastecidas automaticamente com itens de alto giro provenientes do estoque comum." },
             { nome: "Melhorias Portal do fornecedor", area: "Operações", cat: "Evolução", sistema: "LIS", status: "Em andamento", progresso: 90, inicio: "10/04/2026", fim: "30/04/2026", entrega: "-", objetivo: "Adequar e evoluir as regras da ferramenta com base nas necessidades identificadas durante o uso, garantindo maior aderência operacional, eficiência e qualidade nas entregas." },
             { nome: "API Sodexo", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar transmissão direta de dados, eliminando a necessidade de upload manual de arquivos TXT no SIL e reduzindo o tempo operacional." },
             { nome: "Kuiper SKY API", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Garantir agilidade no setup por meio de uma integração rápida para novos fluxos promocionais da SKY, reduzindo o tempo de implementação e acelerando a entrada em operação." },
@@ -209,122 +279,198 @@
             { nome: "API Haleon", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Aumentar a segurança operacional por meio do recebimento automatizado de mailings, eliminando a necessidade de intervenção manual e reduzindo riscos de erro." },
             { nome: "Reforma Tributária 2º fase", area: "Fiscal", cat: "Governança", sistema: "Legado", status: "Em andamento", progresso: 10, inicio: "20/04/2026", fim: "25/05/2026", entrega: "-", objetivo: "Garantir a continuidade e conformidade operacional do Pier em 2026, assegurando sua atuação dentro das exigências legais." },
             { nome: "Novo Modulo de Kits", area: "Clientes", cat: "Inovação", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Desenvolver um novo módulo de kits que suporte a evolução operacional e atenda às demandas do cliente, garantindo a integridade de todo o fluxo operacional, fiscal e sistêmico." },
-            { nome: "Motor de importação Loreal", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Desenvolver uma ferramenta capaz de suportar o mailing da L'Oréal com mais de 30 mil envios por lote, garantindo a validação cadastral do destinatário e o controle de saldo de forma ágil." },
-            { nome: "Novo Orçamento para demais clientes", area: "Clientes", cat: "Evolução", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Garantir a importação das grades dos clientes via site de forma ágil, intuitiva, precisa e eficiente." },
+            { nome: "Motor de importação Loreal", area: "Clientes", cat: "Integração", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Desenvolver uma ferramenta capaz de suportar o mailing da L'Oréal com mais de 30 mil envios por lote, garantindo a validação cadastral do destinatário e o controle de saldo dos itens de forma ágil, precisa e confiável." },
+            { nome: "Novo Orçamento para demais clientes", area: "Clientes", cat: "Evolução", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Garantir a importação das grades dos clientes via site de forma ágil, intuitiva, precisa e eficiente, assegurando qualidade dos dados e facilidade de uso." },
             { nome: "Nova plataforma de gestão parceiros", area: "Operações", cat: "Inovação", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Evoluir o site das bases para torná-lo mais rápido, estável e eficiente, melhorando a performance e a experiência de uso." },
-            { nome: "LIS - Site 2.0 - Piloto Heineken", area: "Clientes", cat: "Inovação", sistema: "LIS", status: "Em andamento", progresso: 10, inicio: "13/04/2026", fim: "01/07/2026", entrega: "-", objetivo: "Disponibilizar as ferramentas mais utilizadas pela HNK em um novo site, com front-end moderno, mais ágil e eficiente." },
-            { nome: "Novo Motor Orçamento", area: "Clientes", cat: "Evolução", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "01/07/2026", entrega: "-", objetivo: "Garantir que o novo orçamento web seja desenvolvido em um ambiente e linguagem mais modernos e fluídos." },
-            { nome: "Implantação TMS", area: "Todos", cat: "Digital", sistema: "TMS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o TMS, estruturando processos, integrações e controles para otimizar a gestão e aumentar a visibilidade das operações." },
-            { nome: "Implantação Módulo Fiscal Totvs", area: "Todos", cat: "Digital", sistema: "TOTVS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o módulo fiscal da TOTVS, garantindo conformidade tributária, automação dos processos fiscais e integração eficiente." },
-            { nome: "Implantação WMS", area: "Todos", cat: "Digital", sistema: "WMS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o WMS, estruturando processos e integrações para aumentar a acuracidade de estoque." },
-            { nome: "Implantação CRM", area: "Todos", cat: "Digital", sistema: "CRM", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o CRM, estruturando processos para aprimorar a gestão do relacionamento com clientes e aumentar a visibilidade do funil." },
-            { nome: "Implementar IA", area: "Todos", cat: "Inovação", sistema: "Empresa", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar soluções de IA para automatizar processos, apoiar a tomada de decisão e aumentar a eficiência operacional." },
-            { nome: "Data Lake", area: "Todos", cat: "Analytics", sistema: "BI", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar um Data Lake para centralizar grandes volumes de dados de diferentes fontes, garantindo escalabilidade e governança." },
-            { nome: "APP Sodexo - Auditoria", area: "Clientes", cat: "Evolução", sistema: "APP SmartCheckin", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o app de Auditoria da Sodexo para a operação de mini mercado." },
-            { nome: "BI SmartCheckin PRP", area: "Clientes", cat: "Analytics", sistema: "BI", status: "Concluído", progresso: 100, inicio: "16/02/2026", fim: "-", entrega: "02/04/2026", objetivo: "Implementar o BI do SmartCheck-in PRP, consolidando dados e indicadores para garantir visibilidade ao cliente." },
-            { nome: "BI Umov.me", area: "Clientes", cat: "Analytics", sistema: "BI", status: "Em andamento", progresso: 70, inicio: "20/04/2026", fim: "04/05/2026", entrega: "-", objetivo: "Integrar o BI com a plataforma Umov.me." },
-            { nome: "Novo fluxo AGF Correios", area: "Operações", cat: "Eficiência", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar um novo fluxo para AGF dos Correios, garantindo padronização do processo e maior controle operacional." },
-            { nome: "Troca da Vinco", area: "Fiscal", cat: "Custo", sistema: "Legado", status: "Concluído", progresso: 100, inicio: "20/04/2026", fim: "-", entrega: "27/04/2026", objetivo: "Realizar a troca da plataforma Vinco, garantindo uma transição segura com foco em redução de custos." },
-            { nome: "Fluxo Devolução Jadlog", area: "Clientes", cat: "Eficiência", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Estruturar e implementar o fluxo de devolução da Jadlog, garantindo padronização e rastreabilidade." },
-            { nome: "Aplicativo Inventário", area: "Operações", cat: "Eficiência", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Desenvolver um aplicativo de inventário para maior acuracidade de estoque e agilidade na contagem." },
-            { nome: "App IA (Conferência)", area: "Operações", cat: "Inovação", sistema: "LIS", status: "Concluído", progresso: 100, inicio: "02/12/2025", fim: "-", entrega: "10/12/2025", objetivo: "Aumentar a velocidade de conferência por meio de reconhecimento visual, tornando o processo mais ágil." }
+            { nome: "LIS - Site 2.0 - Piloto Heineken", area: "Clientes", cat: "Inovação", sistema: "LIS", status: "Em andamento", progresso: 10, inicio: "13/04/2026", fim: "01/07/2026", entrega: "-", objetivo: "Disponibilizar as ferramentas mais utilizadas pela HNK em um novo site, com front-end moderno, mais ágil e eficiente, melhorando a experiência do usuário e a performance operacional." },
+            { nome: "Novo Motor Orçamento", area: "Clientes", cat: "Evolução", sistema: "LIS", status: "Backlog", progresso: 0, inicio: "-", fim: "01/07/2026", entrega: "-", objetivo: "Garantir que o novo orçamento web seja desenvolvido em um ambiente e linguagem mais modernos e fluídos, proporcionando melhor performance, manutenção e experiência de uso." },
+            { nome: "Implantação TMS", area: "Todos", cat: "Digital", sistema: "TMS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o TMS , estruturando processos, integrações e controles para otimizar a gestão, aumentar a visibilidade das operações e garantir maior eficiência e rastreabilidade nas entregas." },
+            { nome: "Implantação Módulo Fiscal Totvs", area: "Todos", cat: "Digital", sistema: "TOTVS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o módulo fiscal da TOTVS, garantindo conformidade tributária, automação dos processos fiscais e integração eficiente com os demais sistemas." },
+            { nome: "Implantação WMS", area: "Todos", cat: "Digital", sistema: "WMS", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o WMS , estruturando processos e integrações para aumentar a acuracidade de estoque, otimizar a operação e garantir maior controle e rastreabilidade das movimentações." },
+            { nome: "Implantação CRM", area: "Todos", cat: "Digital", sistema: "CRM", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o CRM , estruturando processos e integrações para aprimorar a gestão do relacionamento com clientes, aumentar a visibilidade do funil de vendas e apoiar decisões mais estratégicas." },
+            { nome: "Implementar IA", area: "Todos", cat: "Inovação", sistema: "Empresa", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar soluções de IA para automatizar processos, apoiar a tomada de decisão e aumentar a eficiência operacional, garantindo escalabilidade e geração de valor para o negócio." },
+            { nome: "Data Lake", area: "Todos", cat: "Analytics & Dados", sistema: "BI", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar um Data Lake para centralizar e armazenar grandes volumes de dados de diferentes fontes, garantindo escalabilidade, governança e suporte a análises avançadas e tomadas de decisão." },
+            { nome: "APP Sodexo - Auditoria", area: "Clientes", cat: "Evolução", sistema: "APP SmartCheckin", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implantar o app de Auditoria da Sodexo, para a operação de mini mercado" },
+            { nome: "BI SmartCheckin PRP", area: "Clientes", cat: "Analytics & Dados", sistema: "BI", status: "Concluído", progresso: 100, inicio: "16/02/2026", fim: "02/04/2026", entrega: "02/04/2026", objetivo: "Implementar o BI do SmartCheck-in PRP, consolidando dados e indicadores para garantir visibilidade ao cliente." },
+            { nome: "BI Umov.me", area: "Clientes", cat: "Analytics & Dados", sistema: "BI", status: "Em andamento", progresso: 70, inicio: "20/04/2026", fim: "04/05/2026", entrega: "-", objetivo: "Integrar o BI com a Umove" },
+            { nome: "Novo fluxo AGF Correios", area: "Operações", cat: "Eficiência Operacional", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Implementar um novo fluxo para AGF dos Correios, garantindo padronização do processo, maior controle operacional e alinhamento com as diretrizes atuais." },
+            { nome: "Troca da Vinco", area: "Fiscal", cat: "Custo", sistema: "Legado", status: "Concluído", progresso: 100, inicio: "20/04/2026", fim: "27/04/2026", entrega: "27/04/2026", objetivo: "Realizar a troca da plataforma Vinco, garantindo uma transição segura, sem impacto nas operações com foco em redução de custos." },
+            { nome: "Fluxo Devolução Jadlog", area: "Clientes", cat: "Eficiência Operacional", sistema: "Legado", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Estruturar e implementar o fluxo de devolução da Jadlog, garantindo padronização do processo, rastreabilidade das devoluções e maior eficiência no tratamento dos retornos." },
+            { nome: "Aplicativo Inventário", area: "Operações", cat: "Eficiência Operacional", sistema: "lis", status: "Backlog", progresso: 0, inicio: "-", fim: "-", entrega: "-", objetivo: "Desenvolver e implantar um aplicativo de inventário, garantindo maior acuracidade de estoque, agilidade na contagem e rastreabilidade e integração com o SIL" },
+            { nome: "App IA (Conferência)", area: "Operações", cat: "Inovação", sistema: "lis", status: "Concluído", progresso: 100, inicio: "02/12/2025", fim: "10/12/2025", entrega: "10/12/2025", objetivo: "Aumentar a velocidade de conferência por meio de reconhecimento visual, substituindo a busca manual por SKU no sistema e tornando o processo mais ágil e eficiente." }
         ];
 
         const dataHnk = [
-            { nome: "Tela Pedido Unitario", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 40, inicio: "13/04/2026", fim: "07/05/2026", entrega: "-", obs: "Desenvolvimento do novo front-end e motor para pedidos individuais." },
-            { nome: "Tela Pedidos Pendentes", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 10, inicio: "14/04/2026", fim: "30/04/2026", entrega: "-", obs: "Interface para gestão de pedidos aguardando processamento." },
-            { nome: "Aprovar Pedido", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 20, inicio: "15/04/2026", fim: "06/05/2026", entrega: "-", obs: "Funcionalidade de aprovação de pedidos por modal, solicitante ou área." },
-            { nome: "Regra aprovação de Pedido", area: "Tecnologia", cat: "Regra", sistema: "LIS 2.0", status: "Em andamento", progresso: 25, inicio: "16/04/2026", fim: "08/05/2026", entrega: "-", obs: "Configuração das regras de negócio para fluxos de aprovação." },
-            { nome: "Relatório - Saldo Bases", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "17/04/2026", fim: "07/05/2026", entrega: "-", obs: "Visão consolidada de estoque por base." },
-            { nome: "Relatório - Saidas Heineken", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "20/04/2026", fim: "13/05/2026", entrega: "-", obs: "Extrato de movimentações de saída da operação." },
-            { nome: "Relatório - Historico", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "05/05/2026", fim: "26/05/2026", entrega: "-", obs: "Log de histórico de pedidos e movimentações de entrada." },
-            { nome: "Relatório - Aging v1.0", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "06/05/2026", fim: "27/05/2026", entrega: "-", obs: "Nova lógica para reduzir tempo de consulta." },
-            { nome: "Relatório - Recebimento", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "27/04/2026", fim: "22/05/2026", entrega: "-", obs: "Controle de itens recebidos." },
-            { nome: "Relatório - Pendência Fiscal", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "28/04/2026", fim: "23/05/2026", entrega: "-", obs: "Relatório de pendência de cobertura fiscal." },
-            { nome: "Dashboard Heineken", area: "Relatório", cat: "Analytics", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "20/05/2026", fim: "23/05/2026", entrega: "-", obs: "Painel de indicadores gerenciais HNK." },
-            { nome: "Relatório - Tracking", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "29/04/2026", fim: "16/05/2026", entrega: "-", obs: "Rastreabilidade completa de pedidos." },
-            { nome: "Relatório - Meu Estoque", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "19/05/2026", fim: "16/06/2026", entrega: "-", obs: "Visão do cliente sobre as movimentações do aplicativo ." },
-            { nome: "Transferencia Depto/Canal", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "04/05/2026", fim: "22/05/2026", entrega: "-", obs: "Funcionalidade para transferir saldo entre centros de custo." },
+            { nome: "Tela Pedido Unitario", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 40, inicio: "13/04/26", fim: "07/05/26", entrega: "-", obs: "" },
+            { nome: "Tela Pedidos Pendentes", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 10, inicio: "14/04/26", fim: "30/04/26", entrega: "-", obs: "" },
+            { nome: "Aprovar Pedido", area: "Tecnologia", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Em andamento", progresso: 20, inicio: "15/04/26", fim: "06/05/26", entrega: "-", obs: "" },
+            { nome: "Regra aprovação de Pedido", area: "Tecnologia", cat: "Regra", sistema: "LIS 2.0", status: "Em andamento", progresso: 25, inicio: "16/04/26", fim: "08/05/26", entrega: "-", obs: "" },
+            { nome: "Relatório - Saldo Bases", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "17/04/26", fim: "07/05/26", entrega: "-", obs: "" },
+            { nome: "Relatório - Saidas Heineken", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "20/04/26", fim: "13/05/26", entrega: "-", obs: "" },
+            { nome: "Relatório - Historico", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "05/05/26", fim: "26/05/26", entrega: "-", obs: "" },
+            { nome: "Relatório - Aging v1.0", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "06/05/26", fim: "27/05/26", entrega: "-", obs: "Nova Lógica de busca" },
+            { nome: "Relatório - Recebimento", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "27/04/26", fim: "22/05/26", entrega: "-", obs: "" },
+            { nome: "Relatório - Pendência Fiscal", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "28/04/26", fim: "23/05/26", entrega: "-", obs: "" },
+            { nome: "Dashboard Heineken", area: "Relatório", cat: "Analytics", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "20/05/26", fim: "23/05/26", entrega: "-", obs: "" },
+            { nome: "Relatório - Tracking", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "29/04/26", fim: "16/05/26", entrega: "-", obs: "" },
+            { nome: "Relatório - Meu Estoque", area: "Relatório", cat: "Consulta", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "19/05/26", fim: "16/06/26", entrega: "-", obs: "" },
+            { nome: "Transferencia Depto/Canal", area: "Relatório", cat: "Desenvolvimento", sistema: "LIS 2.0", status: "Backlog", progresso: 0, inicio: "04/05/26", fim: "22/05/26", entrega: "-", obs: "" },
             { nome: "Squadfy - API de estoque", area: "Squadfy", cat: "API", sistema: "Pier / Squadfy", status: "Em andamento", progresso: 50, inicio: "-", fim: "20/04/26", entrega: "-", obs: "Foi solicitado um novo campo pela Squadfy alinhada com a Heineken" },
             { nome: "Squadfy - API de login", area: "Squadfy", cat: "API", sistema: "Pier / Squadfy", status: "Em Teste", progresso: 90, inicio: "-", fim: "-", entrega: "-", obs: "Esta API já esta pronta do lado do Pier, porém como é consumida pela Sqauadfy, depende do desenvolvimento deles" },
             { nome: "Squadfy - API permissões", area: "Squadfy", cat: "API", sistema: "Pier / Squadfy", status: "Em Teste", progresso: 90, inicio: "-", fim: "-", entrega: "-", obs: "Esta API já esta pronta do lado do Pier, porém como é consumida pela Sqauadfy, depende do desenvolvimento deles" },
             { nome: "Squadfy - Usuário via SSO", area: "Squadfy", cat: "Integração", sistema: "Pier / Squadfy", status: "Concluído - Ag. Autorização", progresso: 100, inicio: "-", fim: "-", entrega: "-", obs: "Esta feature envolve remoção e adição de permissões com base no grupo recebido pelo AD da Heineken, assim que autorizado, seguirá exatamente o perfil" },
-            { nome: "Squadfy - Tela permissões", area: "Squadfy", cat: "Desenvolvimento", sistema: "Pier / Squadfy", status: "Concluído - Ag. Autorização", progresso: 100, inicio: "25/11/25", fim: "-", entrega: "-", obs: "Este processo já foi concluído anteriormente. No entanto, recomendamos realizar uma nova apresentação antes da subida em produção. Está pendente a regra de quem irá aprovar cada área." },
-            { nome: "Relatório - Aging v2.0", area: "Relatório", cat: "Relatório", sistema: "LIS 2.0", status: "Em andamento", progresso: 50, inicio: "16/04/26", fim: "29/04/26", entrega: "-", obs: "Aging por tempo de estoque - Nas análises identificamos que não se trata de um simples “copia e cola” para o site, sendo necessários ajustes para garantir aderência." }
+            { nome: "Squadfy - Tela permissões", area: "Squadfy", cat: "Desenvolvimento", sistema: "Pier / Squadfy", status: "Concluído - Ag. Autorização", progresso: 100, inicio: "25/11/25", fim: "-", entrega: "-", obs: "Este processo já foi concluído anteriormente. No entanto, considerando o intervalo de tempo desde sua finalização, recomendamos realizar uma nova apresentação antes da subida em produção. Após a validação, poderemos seguir com o deploy de forma segura e alinhada. Está pendente a regra de quem irá aprovar cada área." },
+            { nome: "Relatório - Aging v2.0", area: "Relatório", cat: "Relatório", sistema: "LIS 2.0", status: "Em andamento", progresso: 50, inicio: "16/04/26", fim: "29/04/26", entrega: "-", obs: "Aging por tempo de estoque - Nas análises, especialmente do BI, identificamos que não se trata de um simples “copia e cola” para o site, sendo necessários ajustes para garantir aderência e qualidade." }
         ];
 
-        function generateBattery(p, s) {
-            let n = Math.floor(p/20); if(p>0 && p<20) n=1;
-            let c = s.includes('Concluído') ? "success" : (p<40 ? "warning" : "");
-            let h = ""; for(let i=0; i<5; i++) h += `<div class="battery-segment ${i<n?'active '+c:''}"></div>`;
-            return `<div class="progress-wrapper"><span class="progress-text">${p}%</span><div class="battery-container">${h}</div></div>`;
+        // LOGICA DE EVENTOS (ABRIR E FECHAR)
+        document.addEventListener('click', function(e) {
+            // Dropdown TI
+            if (e.target.closest('#trigger-ti')) {
+                const drop = document.getElementById('drop-ti');
+                const show = drop.classList.contains('show');
+                closeAllPopups();
+                if(!show) drop.classList.add('show');
+            } 
+            // Dropdown HNK
+            else if (e.target.closest('#trigger-hnk')) {
+                const drop = document.getElementById('drop-hnk');
+                const show = drop.classList.contains('show');
+                closeAllPopups();
+                if(!show) drop.classList.add('show');
+            }
+            // Fechar ao clicar fora
+            else {
+                if (!e.target.closest('.custom-filter')) {
+                    closeAllPopups();
+                }
+                if (e.target === document.getElementById('modal')) {
+                    closeModal();
+                }
+            }
+        });
+
+        function closeAllPopups() {
+            document.querySelectorAll('.filter-options').forEach(d => d.classList.remove('show'));
         }
 
-        function getSClass(s) {
-            if(s.includes('Concluído')) return 'st-concluido';
-            if(s.includes('Teste')) return 'st-testes';
-            if(s === 'Em andamento') return 'st-andamento';
-            return 'st-backlog';
+        function mudarTela(id, el) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(el) { document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active')); el.classList.add('active'); }
+            renderTables();
+        }
+
+        function setCustomFilter(type, val) {
+            if(type === 'geral') {
+                curAreaTI = val; document.getElementById('val-ti').innerText = val;
+            } else {
+                curAreaHNK = val; 
+                const lbl = (val === 'Todas' ? 'Tudo' : (val === 'Relatório' ? 'Relatórios' : (val === 'Tecnologia' ? 'Interfaces' : val)));
+                document.getElementById('val-hnk').innerText = lbl;
+            }
+            closeAllPopups();
+            renderTables();
+        }
+
+        // TABELAS E GRÁFICOS
+        function initCharts(tiData, hnkData) {
+            const doughnutOptions = { cutout: '72%', plugins: { legend: { display: false } }, animation: { duration: 1000 } };
+            const doughnutColors = ['#cbd5e1', '#2563eb', '#10b981'];
+
+            if(chartTI) chartTI.destroy();
+            chartTI = new Chart(document.getElementById('chartTI'), {
+                type: 'doughnut',
+                data: { labels: ['Backlog', 'Ativos', 'Concluídos'], datasets: [{ data: tiData, backgroundColor: doughnutColors, borderWidth: 0 }] },
+                options: doughnutOptions
+            });
+
+            if(chartHNK) chartHNK.destroy();
+            chartHNK = new Chart(document.getElementById('chartHNK'), {
+                type: 'doughnut',
+                data: { labels: ['Fila', 'Execução', 'Finalizadas'], datasets: [{ data: hnkData, backgroundColor: doughnutColors, borderWidth: 0 }] },
+                options: doughnutOptions
+            });
+
+            const areasCounts = {};
+            [...dataGeral, ...dataHnk].forEach(d => areasCounts[d.area] = (areasCounts[d.area] || 0) + 1);
+            const sortedLabels = Object.keys(areasCounts).sort((a,b) => areasCounts[b] - areasCounts[a]);
+
+            if(chartAreas) chartAreas.destroy();
+            chartAreas = new Chart(document.getElementById('chartAreas'), {
+                type: 'bar',
+                data: {
+                    labels: sortedLabels,
+                    datasets: [{ data: sortedLabels.map(l => areasCounts[l]), backgroundColor: '#94a3b8', borderRadius: 5 }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { x: { grid: { display: false }, ticks: { stepSize: 1 } }, y: { grid: { display: false } } }
+                }
+            });
+        }
+
+        function renderTables() {
+            const tG = document.getElementById('table-geral');
+            const tH = document.getElementById('table-hnk');
+
+            let gA=0, gD=0, gW=0;
+            tG.innerHTML = "";
+            dataGeral.filter(p => curAreaTI === 'Todas' || p.area === curAreaTI)
+            .sort((a,b) => (weight[a.status]||99) - (weight[b.status]||99))
+            .forEach(p => {
+                const isA = p.status.includes("andamento") || p.status.includes("testes");
+                const isD = p.status.includes("Concluído");
+                if(isA) gA++; else if(isD) gD++; else gW++;
+                let show = filterGeral==='Todos' || (filterGeral==='Ativos' && isA) || (filterGeral==='Concluidos' && isD) || (filterGeral==='Fila' && !isA && !isD);
+                if(show) {
+                    let idx = dataGeral.findIndex(x => x.nome === p.nome);
+                    tG.innerHTML += `<tr><td><strong>${p.nome}</strong></td><td>${generateBattery(p.progresso || 0, p.status)}</td><td><span class="badge ${getSClass(p.status)}">${p.status}</span></td><td>${p.area}</td><td style="text-align:right"><button class="btn-detail" onclick="openModal('geral', ${idx})"><i class="fas fa-chevron-right"></i></button></td></tr>`;
+                }
+            });
+
+            let hA=0, hD=0, hW=0;
+            tH.innerHTML = "";
+            dataHnk.filter(p => curAreaHNK === 'Todas' || p.area === curAreaHNK)
+            .sort((a,b) => (weight[a.status]||99) - (weight[b.status]||99))
+            .forEach(p => {
+                const isA = p.status.includes("andamento");
+                const isD = p.status.includes("Concluído") || p.status.includes("Teste") || p.status.includes("Ag.");
+                if(isA) hA++; else if(isD) hD++; else hW++;
+                let show = filterHnk==='Todos' || (filterHnk==='Ativos' && isA) || (filterHnk==='Concluidos' && isD) || (filterHnk==='Backlog' && !isA && !isD);
+                if(show) {
+                    let idx = dataHnk.findIndex(x => x.nome === p.nome);
+                    let resObs = p.obs ? (p.obs.length > 25 ? p.obs.substring(0, 25) + "..." : p.obs) : "-";
+                    tH.innerHTML += `<tr><td><strong>${p.nome}</strong></td><td>${generateBattery(parseInt(p.progresso) || 0, p.status)}</td><td><span class="badge ${getSClass(p.status)}">${p.status}</span></td><td>${resObs}</td><td style="text-align:right"><button class="btn-detail" onclick="openModal('hnk', ${idx})"><i class="fas fa-chevron-right"></i></button></td></tr>`;
+                }
+            });
+
+            document.getElementById('lb-ti-total').innerText = dataGeral.length;
+            document.getElementById('lb-ti-active').innerText = dataGeral.filter(x => x.status.includes("andamento")||x.status.includes("testes")).length;
+            document.getElementById('lb-ti-done').innerText = dataGeral.filter(x => x.status.includes("Concluído")).length;
+            document.getElementById('lb-hnk-total').innerText = dataHnk.length;
+            document.getElementById('lb-hnk-active').innerText = dataHnk.filter(x => x.status.includes("andamento")).length;
+            document.getElementById('lb-hnk-done').innerText = dataHnk.filter(x => x.status.includes("Concluído")||x.status.includes("Ag.")||x.status.includes("Teste")).length;
+
+            document.getElementById('cg-total').innerText = dataGeral.filter(p => curAreaTI === 'Todas' || p.area === curAreaTI).length;
+            document.getElementById('cg-active').innerText = gA; document.getElementById('cg-done').innerText = gD; document.getElementById('cg-wait').innerText = gW;
+            document.getElementById('ch-total').innerText = dataHnk.filter(p => curAreaHNK === 'Todas' || p.area === curAreaHNK).length;
+            document.getElementById('ch-active').innerText = hA; document.getElementById('ch-done').innerText = hD; document.getElementById('ch-wait').innerText = hW;
+
+            initCharts([gW, gA, gD], [hW, hA, hD]);
         }
 
         function setStatusGeral(f) { filterGeral = f; renderTables(); }
         function setStatusHnk(f) { filterHnk = f; renderTables(); }
-
-        function renderTables() {
-            const areaG = document.getElementById('area-geral').value;
-            const areaH = document.getElementById('area-hnk').value;
-            const tG = document.getElementById('table-geral');
-            const tH = document.getElementById('table-hnk');
-
-            document.querySelectorAll('.kpi-card').forEach(k => k.classList.remove('active-filter'));
-            if(filterGeral !== 'Todos') {
-                const id = 'kg-' + (filterGeral==='Ativos'?'active':(filterGeral==='Fila'?'wait':'done'));
-                if(document.getElementById(id)) document.getElementById(id).classList.add('active-filter');
-            }
-            if(filterHnk !== 'Todos') {
-                const id = 'kh-' + (filterHnk==='Ativos'?'active':(filterHnk==='Backlog'?'wait':'done'));
-                if(document.getElementById(id)) document.getElementById(id).classList.add('active-filter');
-            }
-
-            let gA=0, gD=0, gW=0, hA=0, hD=0, hW=0;
-
-            tG.innerHTML = "";
-            dataGeral.filter(p => areaG === 'Todas' || p.area === areaG)
-            .sort((a,b) => (weight[a.status]||99) - (weight[b.status]||99))
-            .forEach(p => {
-                if(p.status.includes("andamento")||p.status.includes("testes")) gA++; else if(p.status.includes("Concluído")) gD++; else gW++;
-                let show = filterGeral==='Todos' || (filterGeral==='Ativos' && (p.status.includes('andamento')||p.status.includes('testes'))) || (filterGeral==='Concluidos' && p.status.includes('Concluído')) || (filterGeral==='Fila' && !p.status.includes('andamento') && !p.status.includes('Concluído') && !p.status.includes('testes'));
-                if(show) {
-                    let idx = dataGeral.findIndex(x => x.nome === p.nome);
-                    tG.innerHTML += `<tr><td><strong>${p.nome}</strong></td><td>${generateBattery(p.progresso, p.status)}</td><td><span class="badge ${getSClass(p.status)}">${p.status}</span></td><td>${p.area}</td><td style="text-align:right"><button class="btn-detail" onclick="openModal('geral', ${idx})"><i class="fas fa-chevron-right"></i></button></td></tr>`;
-                }
-            });
-
-            tH.innerHTML = "";
-            dataHnk.filter(p => areaH === 'Todas' || p.area === areaH)
-            .sort((a,b) => (weight[a.status]||99) - (weight[b.status]||99))
-            .forEach(p => {
-                if(p.status.includes("andamento")) hA++; else if(p.status.includes("Concluído")||p.status.includes("Teste")) hD++; else hW++;
-                let show = filterHnk==='Todos' || (filterHnk==='Ativos' && p.status.includes('andamento')) || (filterHnk==='Concluidos' && (p.status.includes('Concluído')||p.status.includes('Teste'))) || (filterHnk==='Backlog' && !p.status.includes('andamento') && !p.status.includes('Concluído') && !p.status.includes('Teste'));
-                if(show) {
-                    let idx = dataHnk.findIndex(x => x.nome === p.nome);
-                    let obsResumo = p.obs ? p.obs.substring(0, 25) + "..." : "-";
-                    tH.innerHTML += `<tr><td><strong>${p.nome}</strong></td><td>${generateBattery(p.progresso, p.status)}</td><td><span class="badge ${getSClass(p.status)}">${p.status}</span></td><td>${obsResumo}</td><td style="text-align:right"><button class="btn-detail" onclick="openModal('hnk', ${idx})"><i class="fas fa-chevron-right"></i></button></td></tr>`;
-                }
-            });
-
-            document.getElementById('cg-total').innerText = dataGeral.filter(p => areaG === 'Todas' || p.area === areaG).length;
-            document.getElementById('cg-active').innerText = gA; document.getElementById('cg-done').innerText = gD; document.getElementById('cg-wait').innerText = gW;
-            document.getElementById('ch-total').innerText = dataHnk.filter(p => areaH === 'Todas' || p.area === areaH).length;
-            document.getElementById('ch-done').innerText = hD; document.getElementById('ch-active').innerText = hA; document.getElementById('ch-wait').innerText = hW;
-        }
 
         function openModal(t, i) {
             const p = t === 'geral' ? dataGeral[i] : dataHnk[i];
             document.getElementById('m-nome').innerText = p.nome;
             document.getElementById('m-area').innerText = p.area;
             document.getElementById('m-sistema').innerText = p.sistema;
-            document.getElementById('m-cat').innerText = p.cat;
+            document.getElementById('m-cat').innerText = p.cat || "-";
             let b = document.getElementById('m-status-badge'); b.innerText = p.status; b.className = "badge " + getSClass(p.status);
             
             if(p.status.includes('Concluído')) {
@@ -335,27 +481,36 @@
                 document.getElementById('g-real').style.display = "none"; document.getElementById('m-in').innerText = p.inicio; document.getElementById('m-pre').innerText = p.fim;
             }
 
-            const obsBox = document.getElementById('m-obs-container');
-            const obsLabel = document.getElementById('m-obs-label');
-            const obsText = document.getElementById('m-obs');
+            const box = document.getElementById('m-obs-container');
+            const lbl = document.getElementById('m-obs-label');
+            const txt = document.getElementById('m-obs');
 
             if (t === 'geral' && p.objetivo) {
-                obsBox.style.display = "block";
-                obsLabel.innerText = "Objetivo";
-                obsText.innerText = p.objetivo;
+                box.style.display = "block"; lbl.innerText = "Objetivo"; txt.innerText = p.objetivo;
             } else if (t === 'hnk' && p.obs) {
-                obsBox.style.display = "block";
-                obsLabel.innerText = "Observação";
-                obsText.innerText = p.obs;
-            } else {
-                obsBox.style.display = "none";
-            }
+                box.style.display = "block"; lbl.innerText = "Observação"; txt.innerText = p.obs;
+            } else { box.style.display = "none"; }
 
             document.getElementById('modal').style.display = 'flex';
         }
 
+        function getSClass(s) {
+            if(s.includes('Concluído')) return 'st-concluido';
+            if(s.includes('Teste')) return 'st-testes';
+            if(s === 'Em andamento') return 'st-andamento';
+            return 'st-backlog';
+        }
+
+        function generateBattery(p, s) {
+            let n = Math.floor(p/20); if(p>0 && p<20) n=1;
+            let c = s.includes('Concluído') ? "success" : (p<40 ? "warning" : "");
+            let h = ""; for(let i=0; i<5; i++) h += `<div class="battery-segment ${i<n?'active '+c:''}"></div>`;
+            return `<div class="progress-wrapper"><span class="progress-text">${p}%</span><div class="battery-container">${h}</div></div>`;
+        }
+
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        window.onclick = function(e) { if(e.target == document.getElementById('modal')) closeModal(); }
+        document.getElementById('btn-close-modal').onclick = closeModal;
+
         window.onload = renderTables;
     </script>
 </body>
