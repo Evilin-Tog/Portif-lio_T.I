@@ -187,17 +187,17 @@
     const sW = { "Em andamento": 1, "Em testes": 2, "Em Teste": 2, "Backlog": 3, "Concluído": 4, "Concluído - Ag. Autorização": 4 };
 
     const dataTI = [
-        { n: "Status desatualizado Correios", a: "Operações", sis: "Legado", st: "Backlog", p: 0, c: "Integração & APIs", i: "-", f: "-", o: "Garantir a correta integração entre o BI e os Correios." },
-        { n: "Melhorias SmartPick", a: "Operações", sis: "APP SmartPick", st: "Backlog", p: 0, c: "Eficiência Operacional", i: "-", f: "-", o: "Implementar código de identificação para PN automatizado." },
-        { n: "Tela de bip p/ expedição", a: "Operações", sis: "LIS", st: "Em andamento", p: 75, c: "Eficiência Operacional", i: "30/03/2026", f: "08/05/2026", o: "Otimizar expedição via coletor de dados." },
+        { n: "Status desatualizado Correios", a: "Operações", sis: "Legado", st: "Backlog", p: 0, c: "Integração & APIs", i: "-", f: "-", o: "Garantir a correta integração entre o BI e os Correios, assegurando que os pedidos reflitam o status real, especialmente diferenciando corretamente entre “aguardando confirmação de entrega” e “etiqueta expirada”." },
+        { n: "Melhorias SmartPick", a: "Operações", sis: "APP SmartPick", st: "Backlog", p: 0, c: "Eficiência Operacional", i: "-", f: "-", o: "Implementar no SMARTPICK um código de identificação para PN, automatizando o processo de vinculação e eliminando o registro manual, garantindo maior rastreabilidade, agilidade e confiabilidade na separação dos materiais." },
+        { n: "Tela de bip p/ expedição", a: "Operações", sis: "LIS", st: "Em andamento", p: 85, c: "Eficiência Operacional", i: "30/03/2026", f: "08/05/2026", o: "Otimizar o processo de expedição por meio da implementação do fluxo de entrada e saída de volumes via coletor e ajustes no sistema desktop SIL, garantindo identificação automática de pedidos, melhor gestão das ordens de coleta e maior precisão na conferência final.." },
         { n: "Cadastrar cep no DNE", a: "Clientes", sis: "LIS", st: "Backlog", p: 0, c: "Integração & APIs", i: "-", f: "-", o: "Validação de CEP via API na prenota." },
         { n: "App Coty", a: "Operações", sis: "APP Sil", st: "Backlog", p: 0, c: "Inovação", i: "-", f: "-", o: "Fluxo de registro de fotos e notas fiscais." },
         { n: "Modal impresso M&O", a: "Operações", sis: "Legado", st: "Em andamento", p: 10, c: "Integração & APIs", i: "06/04/2026", f: "24/04/2026", o: "Integração dados impressos e o M&O." },
-        { n: "BID Online", a: "Prospecção", sis: "LIS", st: "Em testes", p: 90, c: "Inovação", i: "08/01/2026", f: "30/04/2026", o: "Automatizar o processo de BID comercial." },
+        { n: "BID Online", a: "Prospecção", sis: "LIS", st: "Em testes", p: 90, c: "Inovação", i: "08/01/2026", f: "30/04/2026", o: "Atualização: Funcionalidade liberada para testes do Tadeu em 22/04. Em 29/04, foi solicitado o manual para que o Ralph também pudesse realizar os testes. O material foi disponibilizado em 30/04. Aguardamos o retorno dos testes até 08/05." },
         { n: "Trava para devolução", a: "Operações", sis: "LIS", st: "Concluído", p: 100, c: "Evolução", i: "12/03/2026", f: "17/04/2026", o: "Identificar transportadoras e restringir agendamentos." },
-        { n: "Faturamento bases", a: "Operações", sis: "LIS", st: "Em testes", p: 90, c: "Inovação", i: "26/03/2026", f: "04/05/2026", o: "Gerir acordos comerciais de armazenagem." },
+        { n: "Faturamento bases", a: "Operações", sis: "LIS", st: "Em testes", p: 90, c: "Inovação", i: "26/03/2026", f: "04/05/2026", o: "Apresentação realizada em 30/05. Foram solicitados alguns ajustes e melhorias para a entrega do MVP. Funcionalidades mais robustas serão contempladas na segunda etapa. A nova previsão será reportada entre os dias 04/05 e 05/05." },
         { n: "Ressuprimento", a: "Operações", sis: "LIS", st: "Concluído", p: 100, c: "Eficiência", i: "30/03/2026", f: "14/04/2026", o: "Picking de alto giro reabastecido automaticamente." },
-        { n: "Melhorias Portal Fornecedor", a: "Operações", sis: "LIS", st: "Em andamento", p: 90, c: "Evolução", i: "10/04/2026", f: "30/04/2026", o: "Adequar regras com base no uso." },
+        { n: "Melhorias Portal Fornecedor", a: "Operações", sis: "LIS", st: "Em testes", p: 90, c: "Evolução", i: "10/04/2026", f: "30/04/2026", o: "Adequar regras com base no uso." },
         { n: "API Sodexo", a: "Clientes", sis: "LIS", st: "Backlog", p: 0, c: "Integração", i: "-", f: "-", o: "Transmissão direta de dados Sodexo." },
         { n: "Kuiper SKY API", a: "Clientes", sis: "LIS", st: "Backlog", p: 0, c: "Integração", i: "-", f: "-", o: "Fluxos promocionais SKY." },
         { n: "Danfe Simplificada", a: "Operações", sis: "Legado", st: "Em andamento", p: 85, c: "Fiscal", i: "16/12/2025", f: "17/04/2026", o: "Agilidade no packout." },
@@ -225,12 +225,12 @@
     ];
 
     const dataHNK = [
-        { n: "Tela Pedido Unitario", sis: "LIS 2.0", st: "Em andamento", p: 65, c: "Dev", i: "13/04/26", f: "07/05/26", o: "Entrada de pedidos unitários." },
+        { n: "Tela Pedido Unitario", sis: "LIS 2.0", st: "Em andamento", p: 75, c: "Dev", i: "13/04/26", f: "07/05/26", o: "Entrada de pedidos unitários." },
         { n: "Squadfy - API estoque", sis: "Pier/Squadfy", st: "Em andamento", p: 50, c: "API", i: "-", f: "20/04/26", o: "Sincronismo de saldo." },
         { n: "Relatório Aging v2.0", sis: "LIS 2.0", st: "Concluído", p: 100, c: "BI", i: "16/04/26", f: "29/04/26", o: "Tempo de estoque." },
         { n: "Squadfy - SSO", sis: "Pier/Squadfy", st: "Concluído - Ag. Autorização", p: 100, c: "Segurança", i: "-", f: "-", o: "AD Heineken." },
-        { n: "Aprovar Pedido", sis: "LIS 2.0", st: "Em andamento", p: 35, i: "15/04/26", f: "06/05/26", o: "Workflow aprovação." },
-        { n: "Regra aprovação", sis: "LIS 2.0", st: "Em andamento", p: 50, i: "16/04/26", f: "08/05/26", o: "Lógica alçadas." }
+        { n: "Aprovar Pedido", sis: "LIS 2.0", st: "Em andamento", p: 80, i: "15/04/26", f: "06/05/26", o: "Workflow aprovação." },
+        { n: "Regra aprovação", sis: "LIS 2.0", st: "Em andamento", p: 65, i: "16/04/26", f: "08/05/26", o: "Lógica alçadas." }
     ];
     for(let i=0; i<15; i++) dataHNK.push({ n: `Relatório HNK ${i+1}`, sis: "LIS 2.0", st: "Backlog", p: 0, c: "Relatório", i: "-", f: "-", o: "Extração de dados." });
 
